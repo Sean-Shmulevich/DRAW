@@ -6,14 +6,14 @@ body {
 
 @font-face {
   font-family: "Bonbance";
-  src: url("/Bonbance.woff2") format("woff2"),
-    url("/Bonbance.woff") format("woff");
+  src: url("/DRAW/Bonbance.woff2") format("woff2"),
+    url("/DRAW/Bonbance.woff") format("woff");
 }
 
 @font-face {
   font-family: "Caramel";
-  src: url("/Caramel.woff2") format("woff2"),
-    url("/Caramel.woff") format("woff");
+  src: url("/DRAW/Caramel.woff2") format("woff2"),
+    url("/DRAW/Caramel.woff") format("woff");
 }
 
 :root {

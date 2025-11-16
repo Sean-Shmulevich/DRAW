@@ -7,17 +7,17 @@
     <button
       class="p-2 bg-blue-200 rounded-2xl border-2 border-black hover:brightness-90 transition"
     >
-      <img src="/eraser.webp" alt="" />
+      <img src="/DRAW/eraser.webp" alt="" />
     </button>
     <button
       class="p-2 bg-green-200 rounded-2xl border-2 border-black hover:brightness-90 transition"
     >
-      <img src="/pencil.webp" alt="" />
+      <img src="/DRAW/pencil.webp" alt="" />
     </button>
     <button
       class="p-2 bg-red-200 rounded-2xl border-2 border-black hover:brightness-90 transition"
     >
-      <img src="/shape.webp" alt="" />
+      <img src="/DRAW/shape.webp" alt="" />
     </button>
   </menu>
 </nav>
