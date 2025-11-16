@@ -19,6 +19,7 @@ function sketch(p: p5, container: HTMLDivElement) {
         let htmlCanvas = canvas.elt;
         canvas.parent(container);
         p.background(255);
+        createPattern(p, 257, 0.8, 180);
     };
 
     p.draw = () => {
@@ -45,6 +46,9 @@ function sketch(p: p5, container: HTMLDivElement) {
         if (p.key === "x") penState = 2;
         if (p.key === "e") penState = 1;
         if (p.key === "l") penState = 0;
+        if (p.key === "p") {
+            createPattern(p);   // pass the p5 instance
+        }
     };
 
     p.keyPressed = () => {
@@ -59,4 +63,43 @@ export const buildP5Canvas = (container: HTMLDivElement) => {
     new P5((p) => sketch(p, container));
     if (!htmlCanvas) throw new Error("HTML canvas creation failed");
     return htmlCanvas;
+}
+
+function createPattern(p: p5, fix?: number, zoom?: number, startColour?: number) {
+
+    let length = 0;
+    let step = p.round(p.random(360));
+    let colour = p.round(p.random(360));
+
+    let rotationAngle = 0;
+    let magnify = p.height / 500;
+
+    let oldX = p.width / 2;
+    let oldY = p.height / 2;
+    let newX: number;
+    let newY: number;
+
+    if (fix != null) step = fix;
+    if (zoom != null) magnify = zoom;
+    if (startColour != null) colour = startColour;
+
+    p.background(255);
+    p.text("colour: " + colour, p.width - 70, 15);
+
+    for (let i = 0; i < 360; i++) {
+        p.stroke(colour % 360, 100, 50);
+
+        newX = length * p.cos(rotationAngle) + oldX;
+        newY = length * p.sin(rotationAngle) + oldY;
+
+        p.line(oldX, oldY, newX, newY);
+
+        oldX = newX;
+        oldY = newY;
+        rotationAngle += step;
+        length -= magnify;
+        colour += 1;
+    }
+
+    p.text("fix: " + step, 10, 15);
 }
