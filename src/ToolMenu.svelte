@@ -1,5 +1,38 @@
 <script lang="ts">
-  let curr_color = "#ff77c8";
+  import { p5Canvas } from "./global_states";
+  let curr_color = $state("#ff77c8");
+  let stroke_size = $state(10);
+  let pen_state = $state(0);
+
+  // debounce or dont use effect.
+  // wait for user to exit the color picker than send the event.
+  // this method is still useful for realtime changing the color of a stroke for a shape or some other canvas object/svg.
+  // $effect(() => {
+  //       p5Canvas.dispatchEvent(new CustomEvent("canvas:pen.setStroke", { detail: curr_color }));
+  // });
+
+  // 🔥 When size changes → notify canvas
+  // use effect is reasonable.
+  function send_stroke_change(size: number) {
+    const canvas = $p5Canvas;
+
+    if (!canvas) {
+      console.log("NO CANVAS");
+      return;
+    }
+
+    canvas.dispatchEvent(
+      new CustomEvent("canvas:pen.setSize", { detail: size })
+    );
+  }
+
+  // When tool changes → notify canvas
+  // effect is reasonable here.
+  $effect(() => {
+    $p5Canvas?.dispatchEvent(
+      new CustomEvent("canvas:setTool", { detail: pen_state })
+    );
+  });
 </script>
 
 <nav aria-label="Tool selection">
@@ -31,6 +64,8 @@
         type="range"
         min="1"
         max="60"
+        bind:value={stroke_size}
+        on:input={() => send_stroke_change(stroke_size)}
         class="w-full accent-pink-400 cursor-pointer"
       />
     </div>

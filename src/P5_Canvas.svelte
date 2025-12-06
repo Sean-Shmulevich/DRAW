@@ -1,13 +1,17 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { buildP5Canvas } from "./CanvasSubsystem";
+  import { p5Canvas } from "./global_states";
+  import p5 from "p5";
 
   let container: HTMLDivElement;
-  let canvasEle: HTMLCanvasElement | null;
 
   // instantiate p5 canvas
-  onMount(() => {
-    canvasEle = buildP5Canvas(container);
+  onMount(async () => {
+    const canvas = await buildP5Canvas(container); // waits for p5 setup()
+    $p5Canvas = canvas; // store the HTMLCanvasElement
+    console.log(p5Canvas);
+    console.log("Canvas ready:", canvas);
   });
 </script>
 

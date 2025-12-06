@@ -20,6 +20,7 @@
     </div>
     <ToolMenu />
   </section>
+
   <section class="w-[80%] h-full">
     <div class="mt-[4.5vh] mx-[2.5%]">
       <P5_Canvas />

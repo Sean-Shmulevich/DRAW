@@ -17,6 +17,10 @@
         /var str_kitty_imgPath\s*=\s*"[^"]*";/,
         'var str_kitty_imgPath = "https://tetrageddon.com/straycat/straycat_images/";'
       )
+      fnStr = fnStr.replace(
+        /var str_kitty_sndPath\s*=\s*"[^"]*";/,
+        'var str_kitty_sndPath = "https://tetrageddon.com/straycat/straycat_audio/";'
+      )
 
       // Redefine the function using the patched version
       window.herekittykittykitty = new Function('return ' + fnStr)()
