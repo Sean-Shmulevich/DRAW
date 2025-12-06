@@ -7,9 +7,18 @@
   // debounce or dont use effect.
   // wait for user to exit the color picker than send the event.
   // this method is still useful for realtime changing the color of a stroke for a shape or some other canvas object/svg.
-  // $effect(() => {
-  //       p5Canvas.dispatchEvent(new CustomEvent("canvas:pen.setStroke", { detail: curr_color }));
-  // });
+  $effect(() => {
+    const canvas = $p5Canvas;
+
+    if (!canvas) {
+      console.log("NO CANVAS");
+      return;
+    }
+
+    canvas.dispatchEvent(
+      new CustomEvent("canvas:pen.setColor", { detail: curr_color })
+    );
+  });
 
   // 🔥 When size changes → notify canvas
   // use effect is reasonable.

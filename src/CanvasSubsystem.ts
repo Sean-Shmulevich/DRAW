@@ -3,6 +3,7 @@ import type p5 from "p5";
 
 let penSize = 1;
 let penState = 0;
+let currColor: [number, number, number] = [0, 0, 0];
 
 
 export let p5Instance: p5 | null = null;
@@ -74,9 +75,29 @@ function sketch(p: p5, container: HTMLDivElement) {
             penSize = size;        // ← VERY IMPORTANT
             p.strokeWeight(size);
         });
+        canvas.elt.addEventListener("canvas:pen.setColor", (ev: Event) => {
+            console.log("GOT PEN SIZE EVENT");
+            const color = (ev as CustomEvent<string>).detail;
+            if (!color) return;
+
+            const rgb = hexToRgb(color); // → [255, 119, 200]
+            console.log(rgb);
+            p.color(currColor);
+            currColor = rgb;
+        });
         p.background(255);
-        createPattern(p, 257, 0.8, 180);
     };
+
+    function hexToRgb(hex: string): [number, number, number] {
+        hex = hex.replace("#", "");
+
+        const bigint = parseInt(hex, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+
+        return [r, g, b];
+    }
 
     p.draw = () => {
         if (p.mouseIsPressed) {
@@ -86,7 +107,7 @@ function sketch(p: p5, container: HTMLDivElement) {
                     currentStroke = {
                         penState,
                         penSize,
-                        color: getStrokeColor(p),
+                        color: currColor,
                         points: []
                     };
                 }

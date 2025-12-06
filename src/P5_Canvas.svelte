@@ -10,8 +10,6 @@
   onMount(async () => {
     const canvas = await buildP5Canvas(container); // waits for p5 setup()
     $p5Canvas = canvas; // store the HTMLCanvasElement
-    console.log(p5Canvas);
-    console.log("Canvas ready:", canvas);
   });
 </script>
 
