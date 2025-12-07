@@ -22,7 +22,7 @@ let currentShape: Shape | null = null;
 export let shapeType: ShapeType = "rectangle";
 let shapeStrokeSize = 10;
 let shapeStrokeColor: [number, number, number] = [0, 0, 0];
-let fillColor: [number, number, number] = [255, 0, 255];
+let fillColor: [number, number, number] = [255, 255, 255];
 
 
 export function getCurrentShape() {

@@ -18,6 +18,8 @@
     clearCanvas,
     generatePattern,
   } from "./Dispatch";
+  import DualColorSwatch from "./DualColorSwatch.svelte";
+  import ShapePreview from "./ShapePreview.svelte";
 
   let curr_color = $state("#000000");
 
@@ -25,8 +27,10 @@
   let pen_state = $state(0);
 
   let shape_stroke_color = $state("#000000");
-  let fill_color = $state("#ff77c8");
+  let fill_color = $state("#FFFFFF");
   let shape_stroke_size = $state(10);
+
+  let current_shape = $state("rectangle");
 
   function sendEmail(): any {
     throw new Error("Function not implemented.");
@@ -100,32 +104,42 @@
       class="bg-yellow-100/60 p-4 rounded-xl border border-yellow-400 shadow flex flex-col gap-4"
     >
       <!-- SHAPE BUTTONS -->
-      <div class="flex gap-3 justify-between">
-        <ToolButton icon="▲" onClick={() => setTool("shape", "triangle")} />
-        <ToolButton icon="●" onClick={() => setTool("shape", "circle")} />
-        <ToolButton icon="■" onClick={() => setTool("shape", "square")} />
+      <div class="flex gap-3 justify-start content-evenly">
+        <ToolButton
+          icon="▲"
+          onClick={() => {
+            setTool("shape", "triangle");
+            current_shape = "triangle";
+          }}
+        />
+        <ToolButton
+          icon="●"
+          onClick={() => {
+            setTool("shape", "circle");
+            current_shape = "circle";
+          }}
+        />
+        <ToolButton
+          icon="■"
+          onClick={() => {
+            setTool("shape", "square");
+            current_shape = "square";
+          }}
+        />
         <ToolButton
           icon="▭"
-          wide={true}
-          onClick={() => setTool("shape", "rectangle")}
+          onClick={() => {
+            setTool("shape", "rectangle");
+            current_shape = "rectangle";
+          }}
         />
-      </div>
-
-      <!-- COLORS -->
-      <div class="flex flex-row gap-3 justify-start">
-        <!-- Fill -->
-        <div class="flex items-center gap-3">
-          <ColorSwatch value={fill_color} onChange={setShapeFillColor} />
-          <span class="text-xs font-sm text-red-700">Fill Color</span>
-        </div>
-
-        <!-- Stroke -->
-        <div class="flex items-center gap-3 ml-auto">
-          <ColorSwatch
-            value={shape_stroke_color}
-            onChange={setShapeStrokeColor}
+        <div class="ml-auto">
+          <DualColorSwatch
+            bind:fill={fill_color}
+            bind:stroke={shape_stroke_color}
+            onFillChange={setShapeFillColor}
+            onStrokeChange={setShapeStrokeColor}
           />
-          <span class="text-xs font-sm text-red-700">Stroke Color</span>
         </div>
       </div>
 
@@ -137,6 +151,19 @@
           max={40}
           value={shape_stroke_size}
           onInput={setShapeStrokeSize}
+        />
+      </div>
+      <div class="flex flex-col mx-auto -mt-5 -mb-4 allign-center items-center">
+        <p class="-mb-3">shape preview</p>
+        <ShapePreview
+          shape={current_shape as
+            | "triangle"
+            | "circle"
+            | "square"
+            | "rectangle"}
+          bind:fill={fill_color}
+          bind:stroke={shape_stroke_color}
+          bind:strokeSize={shape_stroke_size}
         />
       </div>
     </div>
