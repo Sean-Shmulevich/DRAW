@@ -67,16 +67,6 @@ export function hexToRgb(hex: string): [number, number, number] {
     return [(i >> 16) & 255, (i >> 8) & 255, i & 255];
 }
 
-// -------------------------------
-export function drawByPenState(p: p5, penState: number, a: Point, b: Point) {
-    if (penState === 0) p.line(a.x, a.y, b.x, b.y);
-    if (penState === 1) p.ellipse(b.x, b.y, 10, 10);
-    if (penState === 2) {
-        p.line(b.x - 5, b.y - 5, b.x + 5, b.y + 5);
-        p.line(b.x + 5, b.y - 5, b.x - 5, b.y + 5);
-    }
-}
-
 export function drawStrokeSegment(p: p5, stroke: Stroke) {
     const pts = stroke.points;
     if (pts.length < 2) return;
@@ -87,7 +77,12 @@ export function drawStrokeSegment(p: p5, stroke: Stroke) {
     p.stroke(...stroke.color);
     p.strokeWeight(stroke.penSize);
 
-    drawByPenState(p, stroke.penState, a, b);
+    if (penState === 0) p.line(a.x, a.y, b.x, b.y);
+    if (penState === 1) p.ellipse(b.x, b.y, 10, 10);
+    if (penState === 2) {
+        p.line(b.x - 5, b.y - 5, b.x + 5, b.y + 5);
+        p.line(b.x + 5, b.y - 5, b.x - 5, b.y + 5);
+    }
 }
 
 // -------------------------------
@@ -131,6 +126,13 @@ export function addListeners(canvas: HTMLCanvasElement, p: p5) {
         const url = URL.createObjectURL(blob);
         p.loadImage(url, (img) => p.image(img, 0, 0));
     });
+    canvas.addEventListener("canvas:setShape", (ev) => {
+        const blob = (ev as CustomEvent<Blob>).detail;
+        if (!blob) return;
+
+        const url = URL.createObjectURL(blob);
+        p.loadImage(url, (img) => p.image(img, 0, 0));
+    });
 
     canvas.addEventListener("canvas:undo", (ev) => {
         console.log("Hit UNDO BTN");
@@ -147,5 +149,4 @@ export function addListeners(canvas: HTMLCanvasElement, p: p5) {
 
         createPattern(p, countX, countY, seed);
     });
-    // TODO: handle undo/redo & shapes
 }

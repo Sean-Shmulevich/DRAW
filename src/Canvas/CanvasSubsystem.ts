@@ -3,12 +3,27 @@ import type p5 from "p5";
 
 import {
     addListeners,
+    penState,
+
+    // strokes
     getCurrentStroke,
     startStroke,
     appendPoint,
     finishStroke,
-    drawStrokeSegment
+    drawStrokeSegment,
+
 } from "./CanvasState";
+
+import {
+    startShape,
+    updateShape,
+    finishShape,
+    getCurrentShape,
+    getShapes,
+    drawShape,
+    isShapeTool,
+    addShapeListeners
+} from "./Shape";
 
 function sketch(p: p5, container: HTMLDivElement) {
     p.setup = () => {
@@ -22,14 +37,37 @@ function sketch(p: p5, container: HTMLDivElement) {
         (p as any)._onReady?.(canvas.elt);
 
         addListeners(canvas.elt, p);
+        addShapeListeners(canvas.elt);
 
         p.background(255);
     };
 
     p.draw = () => {
+
+        // Draw shapes
+        for (const sh of getShapes()) {
+            drawShape(p, sh);
+        }
+
+        // Draw shape preview
+        if (isShapeTool(penState)) {
+            console.log("ISSHAPETOOL");
+            if (p.mouseIsPressed) {
+                if (!getCurrentShape()) startShape(p.mouseX, p.mouseY);
+                else updateShape(p.mouseX, p.mouseY);
+            } else {
+                if (getCurrentShape()) finishShape();
+            }
+
+            const preview = getCurrentShape();
+            if (preview) drawShape(p, preview);
+
+            return; // exit early: don't draw strokes
+        }
+
+        // Draw strokes (unchanged)
         if (p.mouseIsPressed) {
             if (!getCurrentStroke()) startStroke();
-
             appendPoint(p.mouseX, p.mouseY);
 
             const stroke = getCurrentStroke();

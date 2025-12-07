@@ -39,6 +39,9 @@ export function setShapeType(shape: string) {
     getCanvas()?.dispatchEvent(
         new CustomEvent("canvas:shape.setShape", { detail: shape })
     );
+    getCanvas()?.dispatchEvent(
+        new CustomEvent("canvas:setTool", { detail: 1 })
+    );
 }
 
 export function setShapeStrokeSize(size: number) {
