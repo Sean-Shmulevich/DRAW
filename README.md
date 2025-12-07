@@ -206,3 +206,110 @@ export interface Stroke {
     color: [number, number, number];
     points: Point[];
 }
+```
+
+---
+
+# Recent Updates
+
+## New Features Implemented
+
+- **Take Picture** — Screenshot functionality to capture canvas content and save as PNG to local downloads  
+  - Added `html2canvas` dependency to `package.json`  
+  - Implemented `addPicture()` function in `ToolMenu.svelte`  
+    - Uses `html2canvas` to capture `.canvas-container` DOM element  
+    - Converts canvas to blob and triggers automatic download  
+    - File naming: `draw-screenshot-{timestamp}.png`  
+  - Added "Take Picture" button in `MiscPanel.svelte`  
+  ```ts
+  // ToolMenu.svelte - Key implementation
+  const canvas = await html2canvas(canvasContainer);
+  canvas.toBlob((blob) => {
+    link.download = `draw-screenshot-${Date.now()}.png`;
+    link.click();
+  }, 'image/png');
+  ```  
+
+- **Import Image** — Import images from local files and add them to the canvas  
+  - Implemented `importImage()` function in `ToolMenu.svelte`  
+    - Creates hidden file input element dynamically  
+    - Accepts all image formats via `accept="image/*"`  
+    - Dispatches `canvas:addPicture` event with file blob  
+  - Modified `canvas:addPicture` event listener in `CanvasState.ts`  
+    - Draws images to permanent layer using `getPermanentLayer()`  
+    - Ensures images persist across canvas redraws  
+  - Added "Import Image" button in `MiscPanel.svelte`  
+  ```ts
+  // ToolMenu.svelte
+  fileInput.onchange = (e) => {
+    if (file) dispatchAddPicture(file);
+  };
+  
+  // CanvasState.ts - Draw to permanent layer
+  p.loadImage(url, (img) => {
+    permanent.image(img, 0, 0);  // Persists across redraws
+  });
+  ```  
+
+- **Random Pattern** — Generate random spiral patterns on the canvas  
+  - Modified `canvas:sketch.pattern` event listener in `CanvasState.ts`  
+    - Generates random step, zoom, and startColour values  
+    - Draws pattern directly to permanent layer  
+  - Updated `createPattern()` function in `PatternCreator.ts`  
+    - Uses HSB color mode for smooth color transitions  
+    - Resets to RGB color mode after drawing  
+    - Removed background clearing to allow pattern overlay  
+  ```ts
+  // PatternCreator.ts - Core loop
+  p.colorMode(p.HSB, 360, 100, 100);
+  for (let i = 0; i < 360; i++) {
+    p.stroke(colour % 360, 100, 50);
+    p.line(oldX, oldY, newX, newY);
+    rotationAngle += step;
+    length -= magnify;
+    colour += 1;
+  }
+  p.colorMode(p.RGB, 255);
+  ```  
+
+- **Clear Function** — Fixed to properly clear permanent layer, history, and all state arrays  
+  - Added `clearAll()` function in `SyncSubsystem.ts`  
+    - Clears permanent layer background  
+    - Clears history, strokes, and shapes arrays  
+  - Modified `canvas:clear` event listener in `CanvasState.ts`  
+    - Calls `clearAll()` instead of directly clearing canvas  
+    - Also clears local strokes array and currentStroke  
+  ```ts
+  // SyncSubsystem.ts
+  export function clearAll() {
+    permanentLayer.background(255);
+    history.length = 0;
+    strokes.length = 0;
+    shapes.length = 0;
+  }
+  ```  
+
+## Code Improvements
+
+- **Fixed image import persistence**  
+  - Modified `canvas:addPicture` event listener in `CanvasState.ts`  
+    - Changed from drawing to main canvas `p` to permanent layer  
+    - Uses `getPermanentLayer()` to access permanent graphics layer  
+    - Images now persist after canvas redraws  
+
+- **Fixed shape fill color disappearing after undo**  
+  - Added RGB color mode enforcement in `drawShape()` function in `Shape.ts`  
+    - Sets `p.colorMode(p.RGB, 255)` before drawing  
+  - Added RGB color mode enforcement in `drawStroke()` function in `CanvasState.ts`  
+    - Ensures correct color mode for stroke rendering  
+  - Prevents color mode conflicts from pattern generator's HSB mode  
+  ```ts
+  // Shape.ts & CanvasState.ts
+  p.colorMode(p.RGB, 255);  // Reset before drawing
+  ```  
+
+- **Removed Redo functionality**  
+  - Removed `redo()` function from `Dispatch.ts`  
+  - Removed `canvas:redo` event listener from `syncListeners()` in `SyncSubsystem.ts`  
+  - Removed Redo button and prop from `MiscPanel.svelte`  
+  - Removed Redo import and usage from `ToolMenu.svelte`
