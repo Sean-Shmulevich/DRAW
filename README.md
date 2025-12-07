@@ -16,7 +16,9 @@
 - Add picture  
 - Export (email or local)  
 - Custom event dispatching (ToolMenu → CanvasSubsystem)  
-- Clean/move alternate drawings into their own folder  
+- Clean/move alternate drawings into their own folder
+- Use a preview + permanent graphics layer for unconfirmed drawings  
+  - Needed to clear canvas while drawing shapes without removing existing strokes (shadowing)
 ---
 
 ## ⏳ In-Progress / Remaining Tasks
@@ -37,10 +39,6 @@
   - State not updating correctly in `shape.ts`  
 - Implement eraser  
   - Likely use a pen tool with background-color strokes  
-
-### 🖼️ Drawing System Improvements
-- Use a preview + permanent graphics layer for unconfirmed drawings  
-  - Needed to clear canvas while drawing shapes without removing existing strokes (shadowing)
 
 ### ✉️ Email & Exporting
 - Draft email using the native OS email client  
