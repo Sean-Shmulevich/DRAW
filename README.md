@@ -1,3 +1,87 @@
+# 📐 Requirements Specification
+
+## ✅ Functional Requirements (16)
+
+**FR#1 — Draw Anything**  
+Users can draw arbitrary lines and shapes anywhere on the canvas.
+
+**FR#2 — Create Shapes**  
+Users can create shapes via drag-and-drop, including fill or outline-only.
+
+**FR#3 — Border**  
+Users can set both border (stroke) color and fill color for shapes.
+
+**FR#4 — Select Color**  
+Users can select the color for either the shape tool or the pen tool.
+
+**FR#5 — Broadcast Updates**  
+The system must broadcast a user’s drawing updates to all connected users with **≤100ms latency**.
+
+**FR#6 — Adjust Brush**  
+Users can adjust brush size and opacity for pen strokes.
+
+**FR#7 — Zoom**  
+The system must allow zooming in and out for detailed editing.
+
+**FR#8 — Sound Effect**  
+The system can play playful sound effects during brush drawing.
+
+**FR#9 — Centralize Tools**  
+The system must include a menu that centralizes all tools in one UI location.
+
+**FR#10 — Edit Action**  
+Users can undo or redo actions.
+
+**FR#11 — Save Drawing**  
+Users can save their drawing locally.
+
+**FR#12 — Insert Image**  
+Users can insert images into their canvas.
+
+**FR#13 — Share Drawing**  
+Users can share their work via email.
+
+**FR#14 — React**  
+An interactive character reacts to the drawing in real time.
+
+**FR#15 — Draw Effects**  
+Users can draw effects using hand-tracking features.
+
+**FR#16 — Take Pictures**  
+Users can take a picture using a camera and add it to the canvas.
+
+---
+
+## 🔧 Non-Functional Requirements (6)
+
+**NFR#1 — Import and Export (Performance)**  
+Import/export operations must be fast with no interruptions during drawing.
+
+**NFR#2 — Navigate Interface (Usability)**  
+The interface must be simple, intuitive, and easy for all users to navigate.
+
+**NFR#3 — Support Users (Scalability)**  
+The system must support **at least 10 concurrent users** without performance degradation.
+
+**NFR#4 — Protect User’s Work (Reliability)**  
+The system must auto-save drawing progress to the browser every **30 seconds**.
+
+**NFR#5 — Support All Devices (Compatibility)**  
+The system must run on all major browsers and mobile devices.
+
+**NFR#6 — Be Attractive for Users (Fun / Style)**  
+The system should promote fun, creativity, and playful user interaction.
+
+---
+
+## ⚠️ Constraints (2)
+
+**C#1 — Operating Systems (Supportability)**  
+The website must support only operating systems released within the **last 7 years**.
+
+**C#2 — Access Standards (Accessibility)**  
+The system must meet **WCAG 2.1 web accessibility standards**.
+
 # 📋 Project TODO / Progress
 
 ## ✅ Completed Tasks (After Sprint #3)
