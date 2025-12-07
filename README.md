@@ -1,6 +1,6 @@
 # 📋 Project TODO / Progress
 
-## ✅ Completed Tasks
+## ✅ Completed Tasks (After Sprint #3)
 
 - Stroke slider works  
 - Color picker works  
