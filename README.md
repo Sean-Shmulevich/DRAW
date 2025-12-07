@@ -1,47 +1,102 @@
-# Svelte + TS + Vite
+# 📋 Project TODO / Progress
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+## ✅ Completed Tasks
 
-## Recommended IDE Setup
+- Stroke slider works  
+- Color picker works  
+- Start Sync System + Undo  
+  - Pool for points along line while drawing  
+  - Store points for each line  
+  - Redraw lines  
+  - Store shape type and start + end points  
+  - Redraw shapes  
+- Brush menu with three different brush types  
+- Menu section for cool p5.js sketches (e.g., pattern creator)  
+- Shape creator tool (with fill + stroke customization)  
+- Add picture  
+- Export (email or local)  
+- Custom event dispatching (ToolMenu → CanvasSubsystem)  
+- Clean/move alternate drawings into their own folder  
+---
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+## ⏳ In-Progress / Remaining Tasks
 
-## Need an official Svelte framework?
+### Refactor
+- Split responsibility of Stroke out of CanvasState and use CanvasState.ts for orchestrating state passing to different drawing functions.
+### 🔄 Sync & Persistent State
+- Save `history` in `SyncSystem.ts` to localStorage  
+- Load persisted drawing state on refresh  
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+### 🖌️ UI Interactions / Tooling
+- UI shape fill  
+- UI shape stroke size  
+  - Currently tied to line stroke size  
+  - Event exists but not wired fully  
+- UI stroke / outline color  
+  - Event exists and is being received  
+  - State not updating correctly in `shape.ts`  
+- Implement eraser  
+  - Likely use a pen tool with background-color strokes  
 
-## Technical considerations
+### 🖼️ Drawing System Improvements
+- Use a preview + permanent graphics layer for unconfirmed drawings  
+  - Needed to clear canvas while drawing shapes without removing existing strokes (shadowing)
 
-**Why use this over SvelteKit?**
+### ✉️ Email & Exporting
+- Draft email using the native OS email client  
+  - Attach canvas image blob  
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+### ✋ Interaction Experiments
+- Hand actions (handtrack.js)
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+---
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+# 🧩 Canvas Custom Events
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+Custom DOM events used for communication between the **Svelte UI** and the **p5.js canvas subsystem**.
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+---
 
-**Why include `.vscode/extensions.json`?**
+## 🎨 Brush / Pen Events
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+- `canvas:pen.setSize`  
+- `canvas:pen.setColor`  
+- `canvas:setTool`  
+- `canvas:pen.setBrushType`  
 
-**Why enable `allowJs` in the TS template?**
+---
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
+## 🟦 Shape Events
 
-**Why is HMR not preserving my local component state?**
+- `canvas:shape.setStrokeSize`  
+- `canvas:shape.setFillColor`  
+- `canvas:shape.setStrokeColor`  
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
+---
 
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
+## 🖼️ Canvas Operations
 
+- `canvas:undo`  
+- `canvas:redo`  
+- `canvas:clear`  
+- `canvas:sketch.pattern`  
+
+---
+
+## 📷 Add Picture
+
+- `canvas:addPicture`  
+
+---
+
+## 💾 Save
+
+- `canvas:save`  
+
+---
+
+# 🛠️ Type Definitions
+
+### Tool Types
 ```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
-```
+export type ToolType = "stroke" | "shape";
