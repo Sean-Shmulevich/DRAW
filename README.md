@@ -98,3 +98,30 @@ Custom DOM events used for communication between the **Svelte UI** and the **p5.
 ### Tool Types
 ```ts
 export type ToolType = "stroke" | "shape";
+
+### Shape Types
+```ts
+export type ShapeType = "rectangle" | "circle" | "triangle" | "square" | "";
+
+```ts
+export interface Shape {
+    type: ShapeType;
+    strokeSize: number;
+    strokeColor: [number, number, number];
+    fillColor: [number, number, number];
+    start: Point;
+    end: Point;
+}
+
+### Stroke Types
+
+```ts
+type strokeTypes = "pencil" | "brush" | "marker";
+
+```ts
+export interface Stroke {
+    strokeType: strokeTypes;
+    penSize: number;
+    color: [number, number, number];
+    points: Point[];
+}
