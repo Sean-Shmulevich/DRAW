@@ -4,7 +4,7 @@ import { hexToRgb } from "./CanvasState"; // reuse helper
 import type { Point } from "./CanvasState";
 
 // Shape definitions
-export type ShapeType = "rect" | "circle" | "triangle" | "square" | "";
+export type ShapeType = "rectangle" | "circle" | "triangle" | "square" | "";
 
 export interface Shape {
     type: ShapeType;
@@ -20,10 +20,10 @@ let currentShape: Shape | null = null;
 let shapes: Shape[] = [];
 
 // Shape settings controlled by events
-let shapeType: ShapeType = "";
-let shapeStrokeSize = 2;
+export let shapeType: ShapeType = "rectangle";
+let shapeStrokeSize = 10;
 let shapeStrokeColor: [number, number, number] = [0, 0, 0];
-let fillColor: [number, number, number] = [255, 255, 255];
+let fillColor: [number, number, number] = [255, 0, 255];
 
 // Export accessors
 export function getShapes() {
@@ -34,12 +34,8 @@ export function getCurrentShape() {
     return currentShape;
 }
 
-export function isShapeTool(penState: number) {
-    return penState === 1;
-}
-
 // Mutation
-export function startShape(x: number, y: number) {
+export function startShape(x: number, y: number, shapeType: ShapeType) {
     currentShape = {
         type: shapeType,
         strokeSize: shapeStrokeSize,
@@ -74,7 +70,7 @@ export function drawShape(p: p5, shape: Shape) {
     const h = shape.end.y - shape.start.y;
 
     switch (shape.type) {
-        case "rect":
+        case "rectangle":
             p.rect(x, y, w, h);
             break;
 

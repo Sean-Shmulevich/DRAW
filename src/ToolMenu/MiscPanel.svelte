@@ -10,7 +10,6 @@
   export let saveLocal = () => {};
   export let sendEmail = () => {};
   export let generatePattern = () => {};
-  export let change_pen_state = (_n: number) => {};
   export let addPicture = () => {};
 </script>
 
@@ -20,13 +19,6 @@
   <div class="bg-blue-200/60 p-4 rounded-xl border border-blue-800 shadow">
     <div class="grid grid-cols-2 gap-4 place-items-center">
       <!-- SQUARE BUTTONS -->
-      <ToolButton
-        title="Eraser"
-        icon="🧽"
-        wide={true}
-        onClick={() => change_pen_state(1)}
-        className="w-full"
-      />
       <ToolButton
         className="w-full"
         title="Undo"

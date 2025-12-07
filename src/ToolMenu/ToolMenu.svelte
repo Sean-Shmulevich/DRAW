@@ -9,8 +9,7 @@
     send_stroke_change,
     setColor,
     setBrushType,
-    change_pen_state,
-    setShapeType,
+    setTool,
     setShapeStrokeSize,
     setShapeFillColor,
     setShapeStrokeColor,
@@ -55,15 +54,25 @@
     <div class="flex justify-between items-center">
       <div class="flex gap-3">
         <ToolButton
-          icon="🖌️"
-          title="Soft Brush"
-          onClick={() => setBrushType(0)}
+          icon="✏️"
+          title="Pencil"
+          onClick={() => setTool("stroke", "pencil")}
         />
-        <ToolButton icon="✏️" title="Marker" onClick={() => setBrushType(1)} />
+        <ToolButton
+          icon="🖌️"
+          title="Brush"
+          onClick={() => setTool("stroke", "brush")}
+        />
         <ToolButton
           icon="🪶"
-          title="Calligraphy"
-          onClick={() => setBrushType(2)}
+          title="marker"
+          onClick={() => setTool("stroke", "marker")}
+        />
+
+        <ToolButton
+          title="Eraser"
+          icon="🧽"
+          onClick={() => setTool("stroke", "eraser")}
         />
       </div>
 
@@ -92,13 +101,13 @@
     >
       <!-- SHAPE BUTTONS -->
       <div class="flex gap-3 justify-between">
-        <ToolButton icon="▲" onClick={() => setShapeType("triangle")} />
-        <ToolButton icon="●" onClick={() => setShapeType("circle")} />
-        <ToolButton icon="■" onClick={() => setShapeType("square")} />
+        <ToolButton icon="▲" onClick={() => setTool("shape", "triangle")} />
+        <ToolButton icon="●" onClick={() => setTool("shape", "circle")} />
+        <ToolButton icon="■" onClick={() => setTool("shape", "square")} />
         <ToolButton
           icon="▭"
           wide={true}
-          onClick={() => setShapeType("rectangle")}
+          onClick={() => setTool("shape", "rectangle")}
         />
       </div>
 
@@ -141,7 +150,6 @@
     {saveLocal}
     {sendEmail}
     {generatePattern}
-    {change_pen_state}
     {addPicture}
   />
 </div>

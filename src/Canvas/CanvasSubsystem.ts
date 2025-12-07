@@ -3,14 +3,16 @@ import type p5 from "p5";
 
 import {
     addListeners,
-    penState,
+    toolType,
+    tool,
 
     // strokes
     getCurrentStroke,
     startStroke,
     appendPoint,
     finishStroke,
-    drawStrokeSegment,
+    drawStroke,
+    getStrokes,
 
 } from "./CanvasState";
 
@@ -21,8 +23,8 @@ import {
     getCurrentShape,
     getShapes,
     drawShape,
-    isShapeTool,
-    addShapeListeners
+    addShapeListeners,
+    type ShapeType
 } from "./Shape";
 
 function sketch(p: p5, container: HTMLDivElement) {
@@ -44,37 +46,43 @@ function sketch(p: p5, container: HTMLDivElement) {
 
     p.draw = () => {
 
-        // Draw shapes
-        for (const sh of getShapes()) {
-            drawShape(p, sh);
+
+        // 2️⃣ Redraw all finished strokes
+
+        for (const s of getStrokes()) {
+            drawStroke(p, s);
         }
 
-        // Draw shape preview
-        if (isShapeTool(penState)) {
-            console.log("ISSHAPETOOL");
+        if (tool === "stroke") {
+
             if (p.mouseIsPressed) {
-                if (!getCurrentShape()) startShape(p.mouseX, p.mouseY);
+                if (!getCurrentStroke()) startStroke();
+                appendPoint(p.mouseX, p.mouseY);
+
+                const stroke = getCurrentStroke();
+                if (stroke) drawStroke(p, stroke);
+            } else {
+                if (getCurrentStroke()) finishStroke();
+            }
+        }
+
+        if (tool === "shape") {
+            if (p.mouseIsPressed) {
+
+                if (!getCurrentShape()) startShape(p.mouseX, p.mouseY, toolType as ShapeType);
                 else updateShape(p.mouseX, p.mouseY);
             } else {
                 if (getCurrentShape()) finishShape();
+
             }
 
+
+            // kinda broken
             const preview = getCurrentShape();
             if (preview) drawShape(p, preview);
 
-            return; // exit early: don't draw strokes
         }
 
-        // Draw strokes (unchanged)
-        if (p.mouseIsPressed) {
-            if (!getCurrentStroke()) startStroke();
-            appendPoint(p.mouseX, p.mouseY);
-
-            const stroke = getCurrentStroke();
-            if (stroke) drawStrokeSegment(p, stroke);
-        } else {
-            if (getCurrentStroke()) finishStroke();
-        }
     };
 }
 

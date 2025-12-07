@@ -1,6 +1,7 @@
 import { p5Canvas } from "../global_states";
 import { get } from "svelte/store";
 
+// Get canvas from writable store (global state)
 function getCanvas(): HTMLCanvasElement | null {
     return get(p5Canvas);
 }
@@ -20,9 +21,15 @@ export function setColor(color: string) {
     );
 }
 
-export function change_pen_state(tool_number: number) {
+// used for setting all tool types
+// can be laster extended to accept more complex objects
+// as long as the "tool" is first specified
+// right now its only (stroke | shape)
+export function setTool(tool: string, tool_type: string) {
     getCanvas()?.dispatchEvent(
-        new CustomEvent("canvas:setTool", { detail: tool_number })
+        new CustomEvent("canvas:setTool", {
+            detail: { tool, tool_type }
+        })
     );
 }
 
@@ -35,15 +42,6 @@ export function setBrushType(type: number) {
 // --------------------------------------------------
 // Shapes
 // --------------------------------------------------
-export function setShapeType(shape: string) {
-    getCanvas()?.dispatchEvent(
-        new CustomEvent("canvas:shape.setShape", { detail: shape })
-    );
-    getCanvas()?.dispatchEvent(
-        new CustomEvent("canvas:setTool", { detail: 1 })
-    );
-}
-
 export function setShapeStrokeSize(size: number) {
     getCanvas()?.dispatchEvent(
         new CustomEvent("canvas:shape.setStrokeSize", { detail: size })
@@ -91,7 +89,7 @@ export function addPicture(blob: Blob) {
 }
 
 // --------------------------------------------------
-// Save local (you can fill in the blob yourself)
+// Save local
 // --------------------------------------------------
 export function saveLocal(dataURL: string) {
     getCanvas()?.dispatchEvent(

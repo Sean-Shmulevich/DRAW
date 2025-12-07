@@ -5,20 +5,21 @@ import { createPattern } from "./PatternCreator";
 export interface Point { x: number; y: number; }
 
 export interface Stroke {
-    penState: number;
+    strokeType: string;
     penSize: number;
     color: [number, number, number];
     points: Point[];
 }
 
-// -------------------------------
-// Internal mutable state
-// -------------------------------
+
 let currentStroke: Stroke | null = null;
 let strokes: Stroke[] = [];
 
+export let tool: "shape" | "stroke" = "stroke";
 export let penSize = 1;
-export let penState = 0;
+type strokeTypes = ("pencil" | "brush" | "marker");
+type shapeTypes = ("rectangle" | "square" | "circle" | "triangle");
+export let toolType: strokeTypes | shapeTypes = "pencil";
 export let currColor: [number, number, number] = [0, 0, 0];
 
 // -------------------------------
@@ -32,12 +33,9 @@ export function getStrokes() {
     return strokes;
 }
 
-// -------------------------------
-// Mutation functions
-// -------------------------------
 export function startStroke() {
     currentStroke = {
-        penState,
+        strokeType: toolType,
         penSize,
         color: currColor,
         points: []
@@ -48,6 +46,7 @@ export function appendPoint(x: number, y: number) {
     currentStroke?.points.push({ x, y });
 }
 
+// push points to array for sync and save later on.
 export function finishStroke() {
     if (!currentStroke) return;
     strokes.push(currentStroke);
@@ -67,7 +66,7 @@ export function hexToRgb(hex: string): [number, number, number] {
     return [(i >> 16) & 255, (i >> 8) & 255, i & 255];
 }
 
-export function drawStrokeSegment(p: p5, stroke: Stroke) {
+export function drawStroke(p: p5, stroke: Stroke) {
     const pts = stroke.points;
     if (pts.length < 2) return;
 
@@ -77,9 +76,9 @@ export function drawStrokeSegment(p: p5, stroke: Stroke) {
     p.stroke(...stroke.color);
     p.strokeWeight(stroke.penSize);
 
-    if (penState === 0) p.line(a.x, a.y, b.x, b.y);
-    if (penState === 1) p.ellipse(b.x, b.y, 10, 10);
-    if (penState === 2) {
+    if (toolType === "pencil") p.line(a.x, a.y, b.x, b.y);
+    if (toolType === "marker") p.line(a.x, a.y, b.x, b.y);
+    if (toolType === "brush") {
         p.line(b.x - 5, b.y - 5, b.x + 5, b.y + 5);
         p.line(b.x + 5, b.y - 5, b.x - 5, b.y + 5);
     }
@@ -115,7 +114,12 @@ export function addListeners(canvas: HTMLCanvasElement, p: p5) {
 
     // Tool mode
     canvas.addEventListener("canvas:setTool", (ev) => {
-        penState = (ev as CustomEvent<number>).detail;
+        const { tool: newTool, tool_type } = (ev as CustomEvent<{ tool: string; tool_type: string }>).detail;
+
+        tool = newTool as "shape" | "stroke";            // ← Correct
+        toolType = tool_type as strokeTypes | shapeTypes; // ← Correct
+
+        console.log("Tool:", tool, "ToolType:", toolType);
     });
 
     // Add Picture
