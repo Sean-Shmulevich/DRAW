@@ -1,5 +1,6 @@
 // CanvasState.ts
 import type p5 from "p5";
+import { createPattern } from "./PatternCreator";
 
 export interface Point { x: number; y: number; }
 
@@ -131,5 +132,20 @@ export function addListeners(canvas: HTMLCanvasElement, p: p5) {
         p.loadImage(url, (img) => p.image(img, 0, 0));
     });
 
+    canvas.addEventListener("canvas:undo", (ev) => {
+        console.log("Hit UNDO BTN");
+    });
+    canvas.addEventListener("canvas:redo", (ev) => {
+        console.log("HIT REDO BTN");
+    });
+    canvas.addEventListener("canvas:sketch.pattern", () => {
+
+        // Generate random values each time
+        const countX = Math.floor(Math.random() * 40) + 10;   // 10–50
+        const countY = Math.floor(Math.random() * 40) + 10;   // 10–50
+        const seed = Math.floor(Math.random() * 10000);     // arbitrary seed
+
+        createPattern(p, countX, countY, seed);
+    });
     // TODO: handle undo/redo & shapes
 }
