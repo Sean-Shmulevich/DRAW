@@ -17,6 +17,10 @@
         /var str_kitty_imgPath\s*=\s*"[^"]*";/,
         'var str_kitty_imgPath = "https://tetrageddon.com/straycat/straycat_images/";'
       )
+      fnStr = fnStr.replace(
+        /var str_kitty_sndPath\s*=\s*"[^"]*";/,
+        'var str_kitty_sndPath = "https://tetrageddon.com/straycat/straycat_audio/";'
+      )
 
       // Redefine the function using the patched version
       window.herekittykittykitty = new Function('return ' + fnStr)()
@@ -26,8 +30,8 @@
     });
   </script>
   <script src="https://tetrageddon.com/straycat/straycat.js" onload="overrideStrayCat()"></script>
-  <script type="module" crossorigin src="/DRAW/assets/index-CdM1cQxu.js"></script>
-  <link rel="stylesheet" crossorigin href="/DRAW/assets/index-Dp0H-Pje.css">
+  <script type="module" crossorigin src="/DRAW/assets/index-CF5A-e8M.js"></script>
+  <link rel="stylesheet" crossorigin href="/DRAW/assets/index-DQxXgZNC.css">
 </head>
 
 <body>
