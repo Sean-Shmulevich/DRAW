@@ -1,7 +1,7 @@
 // ShapeState.ts
 import type p5 from "p5";
 import { hexToRgb } from "./CanvasState"; // reuse helper
-import type { Point } from "./CanvasState";
+import type { Point, Stroke } from "./CanvasState";
 
 // Shape definitions
 export type ShapeType = "rectangle" | "circle" | "triangle" | "square" | "";
@@ -17,7 +17,6 @@ export interface Shape {
 
 // Internal state
 let currentShape: Shape | null = null;
-let shapes: Shape[] = [];
 
 // Shape settings controlled by events
 export let shapeType: ShapeType = "rectangle";
@@ -25,10 +24,6 @@ let shapeStrokeSize = 10;
 let shapeStrokeColor: [number, number, number] = [0, 0, 0];
 let fillColor: [number, number, number] = [255, 0, 255];
 
-// Export accessors
-export function getShapes() {
-    return shapes;
-}
 
 export function getCurrentShape() {
     return currentShape;
@@ -54,9 +49,11 @@ export function updateShape(x: number, y: number) {
 
 export function finishShape() {
     if (currentShape) {
-        shapes.push(currentShape);
+        const historyEntry = { tool: "shape", data: currentShape };
         currentShape = null;
+        return historyEntry;
     }
+    return null;
 }
 
 export function drawShape(p: p5, shape: Shape) {

@@ -1,6 +1,7 @@
 // CanvasState.ts
 import type p5 from "p5";
 import { createPattern } from "./PatternCreator";
+import type { Shape } from "./Shape";
 
 export interface Point { x: number; y: number; }
 
@@ -42,15 +43,34 @@ export function startStroke() {
     };
 }
 
+let lastPoint: Point | null = null;
+
 export function appendPoint(x: number, y: number) {
-    currentStroke?.points.push({ x, y });
+    if (!currentStroke) return;
+
+    if (!lastPoint) {
+        lastPoint = { x, y };
+        currentStroke.points.push(lastPoint);
+        return;
+    }
+
+    const dx = x - lastPoint.x;
+    const dy = y - lastPoint.y;
+    const distSq = dx * dx + dy * dy;
+
+    // Only add point when moving > 2px
+    if (distSq > 4) {
+        lastPoint = { x, y };
+        currentStroke.points.push(lastPoint);
+    }
 }
 
 // push points to array for sync and save later on.
 export function finishStroke() {
-    if (!currentStroke) return;
-    strokes.push(currentStroke);
+    if (!currentStroke) return null;
+    let historyEntry = { tool: "stroke", data: currentStroke };
     currentStroke = null;
+    return historyEntry;
 }
 
 // -------------------------------
@@ -66,21 +86,37 @@ export function hexToRgb(hex: string): [number, number, number] {
     return [(i >> 16) & 255, (i >> 8) & 255, i & 255];
 }
 
-export function drawStroke(p: p5, stroke: Stroke) {
+export function drawStroke(p: p5 | p5.Graphics, stroke: Stroke) {
     const pts = stroke.points;
     if (pts.length < 2) return;
 
-    const a = pts[pts.length - 2];
-    const b = pts[pts.length - 1];
+    p.noStroke();
+    p.fill(...stroke.color);
 
-    p.stroke(...stroke.color);
-    p.strokeWeight(stroke.penSize);
+    const radius = stroke.penSize / 2;
+    const stepMultiplier = 0.8;  // SAFE OPTIMIZATION
 
-    if (toolType === "pencil") p.line(a.x, a.y, b.x, b.y);
-    if (toolType === "marker") p.line(a.x, a.y, b.x, b.y);
-    if (toolType === "brush") {
-        p.line(b.x - 5, b.y - 5, b.x + 5, b.y + 5);
-        p.line(b.x + 5, b.y - 5, b.x - 5, b.y + 5);
+    for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1];
+        const b = pts[i];
+
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const distSq = dx * dx + dy * dy;
+
+        // Ignore tiny moves
+        if (distSq < 1) continue;
+
+        const dist = Math.sqrt(distSq);
+        const step = stroke.penSize * stepMultiplier;
+        const steps = Math.max(1, Math.floor(dist / step));
+
+        for (let j = 0; j < steps; j++) {
+            const t = j / steps;
+            const x = a.x + dx * t;
+            const y = a.y + dy * t;
+            p.circle(x, y, stroke.penSize);
+        }
     }
 }
 
@@ -138,12 +174,6 @@ export function addListeners(canvas: HTMLCanvasElement, p: p5) {
         p.loadImage(url, (img) => p.image(img, 0, 0));
     });
 
-    canvas.addEventListener("canvas:undo", (ev) => {
-        console.log("Hit UNDO BTN");
-    });
-    canvas.addEventListener("canvas:redo", (ev) => {
-        console.log("HIT REDO BTN");
-    });
     canvas.addEventListener("canvas:sketch.pattern", () => {
 
         // Generate random values each time
