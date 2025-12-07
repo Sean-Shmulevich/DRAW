@@ -1,7 +1,7 @@
 <script lang="ts">
   import viteLogo from "/vite.svg";
   import P5_Canvas from "./P5_Canvas.svelte";
-  import ToolMenu from "./ToolMenu.svelte";
+  import ToolMenu from "./ToolMenu/ToolMenu.svelte";
 </script>
 
 <main class="flex flex-row h-screen w-screen bg-red-100">
