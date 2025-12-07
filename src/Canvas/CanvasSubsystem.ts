@@ -12,6 +12,7 @@ import {
     appendPoint,
     finishStroke,
     drawStroke,
+    registerPermanentLayerStroke,
     type Stroke,
 
 } from "./CanvasState";
@@ -57,6 +58,7 @@ function sketch(p: p5, container: HTMLDivElement) {
         permanent.clear(); // empty transparent
         preview.clear();
         registerPermanentLayer(permanent);
+        registerPermanentLayerStroke(permanent);
 
 
         addListeners(canvas.elt, p);

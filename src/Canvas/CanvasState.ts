@@ -13,6 +13,12 @@ export interface Stroke {
 }
 
 
+let permanentLayer: p5.Graphics | null = null;
+
+export function registerPermanentLayerStroke(layer: p5.Graphics) {
+    permanentLayer = layer;
+}
+
 let currentStroke: Stroke | null = null;
 let strokes: Stroke[] = [];
 
@@ -129,6 +135,7 @@ export function addListeners(canvas: HTMLCanvasElement, p: p5) {
     // Clear canvas
     canvas.addEventListener("canvas:clear", () => {
         p.background(255);
+        resetCanvas();
     });
 
     // Pen size
@@ -175,12 +182,10 @@ export function addListeners(canvas: HTMLCanvasElement, p: p5) {
     });
 
     canvas.addEventListener("canvas:sketch.pattern", () => {
+        const countX = Math.floor(Math.random() * 40) + 10;
+        const countY = Math.floor(Math.random() * 40) + 10;
+        const seed = Math.floor(Math.random() * 10000);
 
-        // Generate random values each time
-        const countX = Math.floor(Math.random() * 40) + 10;   // 10–50
-        const countY = Math.floor(Math.random() * 40) + 10;   // 10–50
-        const seed = Math.floor(Math.random() * 10000);     // arbitrary seed
-
-        createPattern(p, countX, countY, seed);
+        createPattern(p, permanentLayer!, countX, countY, seed);
     });
 }

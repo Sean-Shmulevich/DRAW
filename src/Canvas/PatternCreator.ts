@@ -1,16 +1,21 @@
 import type p5 from "p5";
 
-export function createPattern(p: p5, fix?: number, zoom?: number, startColour?: number) {
-
+export function createPattern(
+    p: p5,
+    layer: p5.Graphics,
+    fix?: number,
+    zoom?: number,
+    startColour?: number
+) {
     let length = 0;
     let step = p.round(p.random(360));
     let colour = p.round(p.random(360));
 
     let rotationAngle = 0;
-    let magnify = p.height / 500;
+    let magnify = layer.height / 500;
 
-    let oldX = p.width / 2;
-    let oldY = p.height / 2;
+    let oldX = layer.width / 2;
+    let oldY = layer.height / 2;
     let newX: number;
     let newY: number;
 
@@ -18,16 +23,16 @@ export function createPattern(p: p5, fix?: number, zoom?: number, startColour?: 
     if (zoom != null) magnify = zoom;
     if (startColour != null) colour = startColour;
 
-    p.background(255);
-    p.text("colour: " + colour, p.width - 70, 15);
+    layer.background(255);
+    layer.text(`colour: ${colour}`, layer.width - 90, 15);
 
     for (let i = 0; i < 360; i++) {
-        p.stroke(colour % 360, 100, 50);
+        layer.stroke(colour % 360, 100, 50);
 
         newX = length * p.cos(rotationAngle) + oldX;
         newY = length * p.sin(rotationAngle) + oldY;
 
-        p.line(oldX, oldY, newX, newY);
+        layer.line(oldX, oldY, newX, newY);
 
         oldX = newX;
         oldY = newY;
@@ -36,5 +41,5 @@ export function createPattern(p: p5, fix?: number, zoom?: number, startColour?: 
         colour += 1;
     }
 
-    p.text("fix: " + step, 10, 15);
+    layer.text(`fix: ${step}`, 10, 15);
 }
