@@ -67,6 +67,10 @@ export function undo() {
     getCanvas()?.dispatchEvent(new CustomEvent("canvas:undo"));
 }
 
+export function redo() {
+    getCanvas()?.dispatchEvent(new CustomEvent("canvas:redo"));
+}
+
 export function clearCanvas() {
     getCanvas()?.dispatchEvent(new CustomEvent("canvas:clear"));
 }

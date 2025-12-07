@@ -57,9 +57,6 @@ export function finishShape() {
 }
 
 export function drawShape(p: p5, shape: Shape) {
-    // Ensure RGB color mode for shapes
-    p.colorMode(p.RGB, 255);
-    
     p.stroke(...shape.strokeColor);
     p.strokeWeight(shape.strokeSize);
     p.fill(...shape.fillColor);

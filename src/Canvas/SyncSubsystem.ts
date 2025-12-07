@@ -17,10 +17,6 @@ export function registerPermanentLayer(layer: p5.Graphics) {
     permanentLayer = layer;
 }
 
-export function getPermanentLayer(): p5.Graphics | null {
-    return permanentLayer;
-}
-
 export function rebuildFromHistory() {
     strokes = [];
     shapes = [];
@@ -56,15 +52,9 @@ export function undo() {
     for (const s of strokes) {
         drawStroke(permanentLayer, s);
     }
-}
 
-export function clearAll() {
-    if (permanentLayer) {
-        permanentLayer.background(255);
-    }
-    history.length = 0;
-    strokes.length = 0;
-    shapes.length = 0;
+
+
 }
 
 export function syncListeners(canvas: HTMLCanvasElement, p: p5) {
@@ -74,5 +64,10 @@ export function syncListeners(canvas: HTMLCanvasElement, p: p5) {
         if (!permanentLayer) return;
         console.log("UNDO");
         undo();
+    });
+
+    canvas.addEventListener("canvas:redo", (ev) => {
+        // Redo functionality can be implemented here
+        console.log("Redo not implemented yet");
     });
 }

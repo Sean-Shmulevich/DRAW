@@ -2,7 +2,6 @@
 import type p5 from "p5";
 import { createPattern } from "./PatternCreator";
 import type { Shape } from "./Shape";
-import { getPermanentLayer, clearAll } from "./SyncSubsystem";
 
 export interface Point { x: number; y: number; }
 
@@ -11,6 +10,13 @@ export interface Stroke {
     penSize: number;
     color: [number, number, number];
     points: Point[];
+}
+
+
+let permanentLayer: p5.Graphics | null = null;
+
+export function registerPermanentLayerStroke(layer: p5.Graphics) {
+    permanentLayer = layer;
 }
 
 let currentStroke: Stroke | null = null;
@@ -70,7 +76,6 @@ export function finishStroke() {
     if (!currentStroke) return null;
     let historyEntry = { tool: "stroke", data: currentStroke };
     currentStroke = null;
-    lastPoint = null;
     return historyEntry;
 }
 
@@ -78,7 +83,6 @@ export function finishStroke() {
 export function resetCanvas() {
     strokes = [];
     currentStroke = null;
-    lastPoint = null;
 }
 
 // -------------------------------
@@ -89,9 +93,6 @@ export function hexToRgb(hex: string): [number, number, number] {
 }
 
 export function drawStroke(p: p5 | p5.Graphics, stroke: Stroke) {
-    // Ensure RGB color mode for strokes
-    p.colorMode(p.RGB, 255);
-    
     const pts = stroke.points;
     if (pts.length < 2) return;
 
@@ -133,10 +134,8 @@ export function addListeners(canvas: HTMLCanvasElement, p: p5) {
 
     // Clear canvas
     canvas.addEventListener("canvas:clear", () => {
-        clearAll();
-        // Also clear local strokes
-        strokes.length = 0;
-        currentStroke = null;
+        p.background(255);
+        resetCanvas();
     });
 
     // Pen size
@@ -171,54 +170,22 @@ export function addListeners(canvas: HTMLCanvasElement, p: p5) {
         const blob = (ev as CustomEvent<Blob>).detail;
         if (!blob) return;
 
-        const permanent = getPermanentLayer();
-        if (!permanent) {
-            console.error("Permanent layer not available");
-            return;
-        }
-
         const url = URL.createObjectURL(blob);
-        p.loadImage(url, (img) => {
-            // Draw image to permanent layer so it persists
-            permanent.image(img, 0, 0);
-            URL.revokeObjectURL(url);
-        });
+        p.loadImage(url, (img) => p.image(img, 0, 0));
     });
     canvas.addEventListener("canvas:setShape", (ev) => {
         const blob = (ev as CustomEvent<Blob>).detail;
         if (!blob) return;
 
-        const permanent = getPermanentLayer();
-        if (!permanent) {
-            console.error("Permanent layer not available");
-            return;
-        }
-
         const url = URL.createObjectURL(blob);
-        p.loadImage(url, (img) => {
-            // Draw image to permanent layer so it persists
-            permanent.image(img, 0, 0);
-            URL.revokeObjectURL(url);
-        });
+        p.loadImage(url, (img) => p.image(img, 0, 0));
     });
 
     canvas.addEventListener("canvas:sketch.pattern", () => {
-        const permanent = getPermanentLayer();
-        if (!permanent) {
-            console.error("Permanent layer not available");
-            return;
-        }
+        const countX = Math.floor(Math.random() * 40) + 10;
+        const countY = Math.floor(Math.random() * 40) + 10;
+        const seed = Math.floor(Math.random() * 10000);
 
-        // Generate random values each time
-        const step = Math.floor(Math.random() * 360);
-        const zoom = permanent.height / 500;
-        const startColour = Math.floor(Math.random() * 360);
-
-        console.log("Creating pattern with step:", step, "zoom:", zoom, "colour:", startColour);
-        
-        // Draw pattern to permanent layer
-        createPattern(permanent, step, zoom, startColour);
-        
-        console.log("Pattern created");
+        createPattern(p, permanentLayer!, countX, countY, seed);
     });
 }

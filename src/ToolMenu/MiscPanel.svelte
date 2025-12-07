@@ -3,6 +3,7 @@
 
   // pass in functions or implement logic here.
   export let undo = () => {};
+  export let redo = () => {};
   export let clearCanvas = () => {
     // Send Clear canvas event
   };
@@ -10,7 +11,6 @@
   export let sendEmail = () => {};
   export let generatePattern = () => {};
   export let addPicture = () => {};
-  export let importImage = () => {};
 </script>
 
 <div class="flex flex-col gap-2">
@@ -28,6 +28,13 @@
       />
 
       <ToolButton
+        title="Redo"
+        icon="↪️"
+        wide={true}
+        className="w-full"
+        onClick={redo}
+      />
+      <ToolButton
         title="Clear"
         icon="🧼"
         wide={true}
@@ -35,23 +42,22 @@
         onClick={clearCanvas}
       />
 
-      <!-- ADD PICTURE -->
-      <ToolButton
-        icon="📸"
-        title="Take Picture"
-        className="w-full col-span-2"
-        wide={true}
-        onClick={addPicture}
-      />
+      <!-- ADD PICTURE (special label wrapper) -->
+      <label class="col-span-2 w-full cursor-pointer">
+        <ToolButton
+          icon="📸"
+          title="Take Picture"
+          className="w-full"
+          wide={true}
+        />
 
-      <!-- IMPORT IMAGE -->
-      <ToolButton
-        icon="🖼️"
-        title="Import Image"
-        className="w-full col-span-2"
-        wide={true}
-        onClick={importImage}
-      />
+        <input
+          type="file"
+          accept="image/*"
+          class="hidden"
+          on:change={(e) => addPicture()}
+        />
+      </label>
 
       <ToolButton
         icon="🎲"

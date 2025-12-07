@@ -4,7 +4,6 @@
   import MiscPanel from "./MiscPanel.svelte";
   import Slider from "./Slider.svelte";
   import ToolButton from "./ToolButton.svelte";
-  import html2canvas from "html2canvas";
 
   import {
     send_stroke_change,
@@ -15,9 +14,9 @@
     setShapeFillColor,
     setShapeStrokeColor,
     undo,
+    redo,
     clearCanvas,
     generatePattern,
-    addPicture as dispatchAddPicture,
   } from "./Dispatch";
 
   let curr_color = $state("#000000");
@@ -40,67 +39,10 @@
     throw new Error("Function not implemented.");
   }
 
-  async function addPicture(): Promise<void> {
-    try {
-      // Find the canvas container element
-      const canvasContainer = document.querySelector('.canvas-container') as HTMLElement;
-      
-      if (!canvasContainer) {
-        alert('Canvas container not found. Cannot take screenshot.');
-        return;
-      }
-
-      // Take screenshot of the canvas container using html2canvas
-      const canvas = await html2canvas(canvasContainer, {
-        backgroundColor: '#ffffff',
-        scale: 1,
-        logging: false,
-        useCORS: true,
-      });
-
-      // Convert canvas to blob and save to local
-      canvas.toBlob((blob) => {
-        if (blob) {
-          // Create download link
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `draw-screenshot-${Date.now()}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        } else {
-          console.error('Failed to convert canvas to blob');
-          alert('Failed to save screenshot.');
-        }
-      }, 'image/png');
-
-    } catch (error) {
-      console.error('Failed to take screenshot:', error);
-      alert('Failed to take screenshot. Please try again.');
-    }
-  }
-
-  function importImage(): void {
-    // Create file input element
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.style.display = 'none';
-    
-    fileInput.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        // Convert file to blob and pass to canvas
-        dispatchAddPicture(file);
-      }
-      // Remove input element
-      document.body.removeChild(fileInput);
-    };
-    
-    document.body.appendChild(fileInput);
-    fileInput.click();
+  function addPicture(): any {
+    // canvas:addPicture (image blob)
+    // take a picture with the camera then pass the image data blob to the canvas via dispatching the blob to the canvas with an event.
+    throw new Error("Function not implemented.");
   }
 </script>
 
@@ -203,11 +145,11 @@
   <!-- MISC TOOLS SECTION -->
   <MiscPanel
     {undo}
+    {redo}
     {clearCanvas}
     {saveLocal}
     {sendEmail}
     {generatePattern}
     {addPicture}
-    {importImage}
   />
 </div>
