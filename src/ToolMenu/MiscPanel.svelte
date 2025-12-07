@@ -11,7 +11,7 @@
   export let sendEmail = () => {};
   export let generatePattern = () => {};
   export let change_pen_state = (_n: number) => {};
-  export let addPicture = (_e: Event) => {};
+  export let addPicture = () => {};
 </script>
 
 <div class="flex flex-col gap-2">
@@ -54,7 +54,7 @@
       <label class="col-span-2 w-full cursor-pointer">
         <ToolButton
           icon="📸"
-          title="Add Picture"
+          title="Take Picture"
           className="w-full"
           wide={true}
         />
@@ -63,7 +63,7 @@
           type="file"
           accept="image/*"
           class="hidden"
-          on:change={(e) => addPicture(e)}
+          on:change={(e) => addPicture()}
         />
       </label>
 

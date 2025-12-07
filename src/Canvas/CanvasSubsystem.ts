@@ -1,6 +1,6 @@
 import P5 from "p5";
 import type p5 from "p5";
-import { createPattern } from "./CanvasFunctions/PatternCreator";
+import { createPattern } from "./PatternCreator";
 
 let penSize = 1;
 let penState = 0;

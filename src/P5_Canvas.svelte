@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { buildP5Canvas } from "./CanvasSubsystem";
+  import { buildP5Canvas } from "./Canvas/CanvasSubsystem";
   import { p5Canvas } from "./global_states";
   import p5 from "p5";
 

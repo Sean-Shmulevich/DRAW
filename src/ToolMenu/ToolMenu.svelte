@@ -4,7 +4,23 @@
   import MiscPanel from "./MiscPanel.svelte";
   import Slider from "./Slider.svelte";
   import ToolButton from "./ToolButton.svelte";
-  let curr_color = $state("#ff77c8");
+
+  import {
+    send_stroke_change,
+    setColor,
+    setBrushType,
+    change_pen_state,
+    setShapeType,
+    setShapeStrokeSize,
+    setShapeFillColor,
+    setShapeStrokeColor,
+    undo,
+    redo,
+    clearCanvas,
+    generatePattern,
+  } from "./Dispatch";
+
+  let curr_color = $state("#000000");
 
   let stroke_size = $state(10);
   let pen_state = $state(0);
@@ -13,121 +29,20 @@
   let fill_color = $state("#ff77c8");
   let shape_stroke_size = $state(10);
 
-  // debounce or dont use effect.
-  // wait for user to exit the color picker than send the event.
-  // this method is still useful for realtime changing the color of a stroke for a shape or some other canvas object/svg.
-  $effect(() => {
-    const canvas = $p5Canvas;
-
-    if (!canvas) {
-      console.log("NO CANVAS");
-      return;
-    }
-
-    canvas.dispatchEvent(
-      new CustomEvent("canvas:pen.setColor", { detail: curr_color })
-    );
-  });
-
-  $effect(() => {
-    const canvas = $p5Canvas;
-
-    if (!canvas) {
-      console.log("NO CANVAS");
-      return;
-    }
-
-    canvas.dispatchEvent(
-      new CustomEvent("canvas:shape.setColor", { detail: curr_color })
-    );
-  });
-
-  $effect(() => {
-    const canvas = $p5Canvas;
-
-    if (!canvas) {
-      console.log("NO CANVAS");
-      return;
-    }
-
-    canvas.dispatchEvent(
-      new CustomEvent("canvas:shape.setFill", { detail: curr_color })
-    );
-  });
-
-  // 🔥 When size changes → notify canvas
-  // use effect is reasonable.
-  function send_stroke_change(size: number) {
-    const canvas = $p5Canvas;
-
-    if (!canvas) {
-      console.log("NO CANVAS");
-      return;
-    }
-
-    canvas.dispatchEvent(
-      new CustomEvent("canvas:pen.setSize", { detail: size })
-    );
-  }
-
-  function change_pen_state(tool_number: number) {
-    const canvas = $p5Canvas;
-
-    if (!canvas) {
-      return;
-    }
-
-    canvas.dispatchEvent(
-      new CustomEvent("canvas:setTool", { detail: tool_number })
-    );
-  }
-
-  // When tool changes → notify canvas
-  // effect is reasonable here.
-
-  function setBrushType(arg0: number): any {
-    return 0;
-  }
-
-  function setShapeType(arg0: string): any {
-    throw new Error("Function not implemented.");
-  }
-
-  function generatePattern(): any {
-    throw new Error("Function not implemented.");
-  }
-
   function sendEmail(): any {
     throw new Error("Function not implemented.");
+    // take a picture of the $p5Canvas and use the email API to create an email with the client os email client.
   }
 
   function saveLocal(): any {
+    // take a picture of the $p5Canvas html element
+    // canvas.toDataURL("image/png")
     throw new Error("Function not implemented.");
   }
 
-  function clearCanvas(): any {
-    throw new Error("Function not implemented.");
-  }
-
-  function redo(): any {
-    throw new Error("Function not implemented.");
-  }
-
-  function undo(): any {
-    throw new Error("Function not implemented.");
-  }
-
-  function selectMiscTool(arg0: string): any {
-    throw new Error("Function not implemented.");
-  }
-
-  function addPicture(
-    e: Event & { currentTarget: EventTarget & HTMLInputElement }
-  ): any {
-    throw new Error("Function not implemented.");
-  }
-
-  function setColor(color: string): void {
+  function addPicture(): any {
+    // canvas:addPicture (image blob)
+    // take a picture with the camera then pass the image data blob to the canvas via dispatching the blob to the canvas with an event.
     throw new Error("Function not implemented.");
   }
 </script>
@@ -191,13 +106,16 @@
       <div class="flex flex-row gap-3 justify-start">
         <!-- Fill -->
         <div class="flex items-center gap-3">
-          <ColorSwatch value={fill_color} onChange={setColor} />
+          <ColorSwatch value={fill_color} onChange={setShapeFillColor} />
           <span class="text-xs font-sm text-red-700">Fill Color</span>
         </div>
 
         <!-- Stroke -->
         <div class="flex items-center gap-3 ml-auto">
-          <ColorSwatch value={shape_stroke_color} onChange={setColor} />
+          <ColorSwatch
+            value={shape_stroke_color}
+            onChange={setShapeStrokeColor}
+          />
           <span class="text-xs font-sm text-red-700">Stroke Color</span>
         </div>
       </div>
@@ -209,12 +127,21 @@
           min={1}
           max={40}
           value={shape_stroke_size}
-          onInput={send_stroke_change}
+          onInput={setShapeStrokeSize}
         />
       </div>
     </div>
   </div>
 
   <!-- MISC TOOLS SECTION -->
-  <MiscPanel />
+  <MiscPanel
+    {undo}
+    {redo}
+    {clearCanvas}
+    {saveLocal}
+    {sendEmail}
+    {generatePattern}
+    {change_pen_state}
+    {addPicture}
+  />
 </div>
