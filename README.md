@@ -99,11 +99,9 @@ Custom DOM events used for communication between the **Svelte UI** and the **p5.
 ```ts
 export type ToolType = "stroke" | "shape";
 
-### Shape Types
-```ts
+// Shape Types
 export type ShapeType = "rectangle" | "circle" | "triangle" | "square" | "";
 
-```ts
 export interface Shape {
     type: ShapeType;
     strokeSize: number;
@@ -113,12 +111,10 @@ export interface Shape {
     end: Point;
 }
 
-### Stroke Types
+// Stroke Types
 
-```ts
 type strokeTypes = "pencil" | "brush" | "marker";
 
-```ts
 export interface Stroke {
     strokeType: strokeTypes;
     penSize: number;
