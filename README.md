@@ -289,6 +289,11 @@ export interface Stroke {
   }
   ```  
 
+- **Persistent History** — Auto-save drawings to `localStorage` and restores on refresh  
+  - Added `persistHistory()` and `restoreFromStorage()` in `SyncSubsystem.ts`  
+    - Serializes `history` and redraws strokes/shapes into the permanent layer when reloaded  
+  - Made history writes in `CanvasSubsystem.ts` persist after each stroke/shape and restore during setup  
+
 ## Code Improvements
 
 - **Fixed image import persistence**  

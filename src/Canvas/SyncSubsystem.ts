@@ -13,6 +13,42 @@ export type HistoryEntry =
 export let history: Array<{ tool: "stroke" | "shape", data: Stroke | Shape }> = new Array();
 let permanentLayer: p5.Graphics | null = null;
 
+const HISTORY_STORAGE_KEY = "draw-history";
+
+function storageAvailable() {
+    return typeof window !== "undefined" && typeof localStorage !== "undefined";
+}
+
+export function persistHistory() {
+    if (!storageAvailable()) return;
+    try {
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    } catch (err) {
+        console.error("Failed to persist history", err);
+    }
+}
+
+export function restoreFromStorage(): boolean {
+    if (!storageAvailable() || !permanentLayer) return false;
+    try {
+        const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+        if (!raw) return false;
+        const parsed = JSON.parse(raw) as HistoryEntry[];
+        if (!Array.isArray(parsed)) return false;
+        history = parsed as any;
+        rebuildFromHistory();
+
+        // Redraw onto permanent layer
+        permanentLayer.background(255);
+        for (const sh of shapes) drawShape(permanentLayer, sh);
+        for (const s of strokes) drawStroke(permanentLayer, s);
+        return true;
+    } catch (err) {
+        console.error("Failed to restore history", err);
+        return false;
+    }
+}
+
 export function registerPermanentLayer(layer: p5.Graphics) {
     permanentLayer = layer;
 }
@@ -55,6 +91,8 @@ export function undo() {
     for (const s of strokes) {
         drawStroke(permanentLayer, s);
     }
+
+    persistHistory();
 }
 
 export function clearAll() {
@@ -64,6 +102,8 @@ export function clearAll() {
     history.length = 0;
     strokes.length = 0;
     shapes.length = 0;
+
+    persistHistory();
 }
 
 export function syncListeners(canvas: HTMLCanvasElement, p: p5) {
