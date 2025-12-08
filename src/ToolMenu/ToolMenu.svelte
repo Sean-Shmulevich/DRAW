@@ -186,6 +186,9 @@
           icon="▭"
           active={current_shape === "rectangle"}
           onClick={() => {
+            if (activeSection !== "shape") {
+              activeSection = "shape";
+            }
             setTool("shape", "rectangle");
             current_shape = "rectangle";
           }}
