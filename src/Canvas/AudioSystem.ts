@@ -32,7 +32,7 @@ class AudioSystem {
         }
     }
 
-    // Start a continuous drawing sound
+   // Start a continuous drawing sound
     startDrawSound() {
         if (!this.audioContext || !this.gainNode || this.isPlaying) return;
 
@@ -42,39 +42,57 @@ class AudioSystem {
                 this.audioContext.resume();
             }
 
-            this.oscillator = this.audioContext.createOscillator();
-            this.oscillator.type = 'sine';
-            this.oscillator.frequency.value = 200; // Soft pencil-like frequency
+            // Create white noise for realistic marker scratch sound
+            const bufferSize = this.audioContext.sampleRate * 2;
+            const noiseBuffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
             
-            // Create a filter for smoother sound
+            // Fill with random values for white noise
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+            
+            const whiteNoise = this.audioContext.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+            whiteNoise.loop = true;
+            
+            // Filter to make it sound like paper friction
             const filter = this.audioContext.createBiquadFilter();
-            filter.type = 'lowpass';
-            filter.frequency.value = 800;
+            filter.type = 'bandpass';
+            filter.frequency.value = 3000; // Mid-high frequencies for scratch sound
+            filter.Q.value = 0.5; // Not too narrow
             
-            this.oscillator.connect(filter);
+            whiteNoise.connect(filter);
             filter.connect(this.gainNode);
             
             // Fade in
             this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
             this.gainNode.gain.linearRampToValueAtTime(0.08, this.audioContext.currentTime + 0.05);
             
-            this.oscillator.start();
+            whiteNoise.start();
             this.isPlaying = true;
+            
+            // Store reference to stop it later
+            (this as any).noiseSource = whiteNoise;
         } catch (e) {
             console.warn("Could not start draw sound", e);
         }
     }
-
-    // Stop the drawing sound
+  // Stop the drawing sound
     stopDrawSound() {
-        if (!this.audioContext || !this.oscillator || !this.gainNode || !this.isPlaying) return;
+        if (!this.audioContext || !this.gainNode || !this.isPlaying) return;
 
         try {
             // Fade out
             this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, this.audioContext.currentTime);
             this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.05);
             
-            this.oscillator.stop(this.audioContext.currentTime + 0.05);
+            const noiseSource = (this as any).noiseSource;
+            if (noiseSource) {
+                noiseSource.stop(this.audioContext.currentTime + 0.05);
+                (this as any).noiseSource = null;
+            }
+            
             this.isPlaying = false;
             this.oscillator = null;
         } catch (e) {
