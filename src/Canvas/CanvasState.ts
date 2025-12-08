@@ -24,7 +24,7 @@ let strokes: Stroke[] = [];
 
 export let tool: "shape" | "stroke" = "stroke";
 export let penSize = 1;
-type strokeTypes = ("pencil" | "brush" | "marker");
+type strokeTypes = ("pencil" | "brush" | "marker" | "eraser");
 type shapeTypes = ("rectangle" | "square" | "circle" | "triangle");
 export let toolType: strokeTypes | shapeTypes = "pencil";
 export let currColor: [number, number, number] = [0, 0, 0];
@@ -50,6 +50,38 @@ export function startStroke() {
 }
 
 let lastPoint: Point | null = null;
+
+// Uniformly sample a stroke's points so large/fast movements stay dense.
+// spacingFactor is multiplied by pen size and clamped by MIN_SAMPLE_SPACING.
+const MIN_SAMPLE_SPACING = 1.2;
+type SampleVisitor = (x: number, y: number, a: Point, b: Point, t: number) => void;
+
+function sampleStrokePoints(stroke: Stroke, spacingFactor: number, visit: SampleVisitor) {
+    const pts = stroke.points;
+    if (pts.length < 2) return;
+
+    const baseSpacing = Math.max(MIN_SAMPLE_SPACING, stroke.penSize * spacingFactor);
+
+    for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1];
+        const b = pts[i];
+
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < 0.25) continue;
+
+        const dist = Math.sqrt(distSq);
+        const steps = Math.max(1, Math.ceil(dist / baseSpacing));
+
+        for (let j = 0; j <= steps; j++) {
+            const t = j / steps;
+            const x = a.x + dx * t;
+            const y = a.y + dy * t;
+            visit(x, y, a, b, t);
+        }
+    }
+}
 
 export function appendPoint(x: number, y: number) {
     if (!currentStroke) return;
@@ -93,37 +125,106 @@ export function hexToRgb(hex: string): [number, number, number] {
 }
 
 export function drawStroke(p: p5 | p5.Graphics, stroke: Stroke) {
-    const pts = stroke.points;
-    if (pts.length < 2) return;
-
-    p.noStroke();
-    p.fill(...stroke.color);
-
-    const radius = stroke.penSize / 2;
-    const stepMultiplier = 0.8;  // SAFE OPTIMIZATION
-
-    for (let i = 1; i < pts.length; i++) {
-        const a = pts[i - 1];
-        const b = pts[i];
-
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        const distSq = dx * dx + dy * dy;
-
-        // Ignore tiny moves
-        if (distSq < 1) continue;
-
-        const dist = Math.sqrt(distSq);
-        const step = stroke.penSize * stepMultiplier;
-        const steps = Math.max(1, Math.floor(dist / step));
-
-        for (let j = 0; j < steps; j++) {
-            const t = j / steps;
-            const x = a.x + dx * t;
-            const y = a.y + dy * t;
-            p.circle(x, y, stroke.penSize);
-        }
+    // Delegate to brush-specific renderers based on strokeType.
+    // Keeps the Stroke data shape unchanged for history/sync compatibility.
+    switch (stroke.strokeType) {
+        case "pencil":
+            drawStrokePencil(p, stroke);
+            break;
+        case "brush":
+            drawStrokeBrush(p, stroke);
+            break;
+        case "marker":
+            drawStrokeMarker(p, stroke);
+            break;
+        case "eraser":
+            drawStrokeEraser(p, stroke);
+            break;
+        default:
+            // Fallback to pencil behavior for unknown types
+            drawStrokePencil(p, stroke);
+            break;
     }
+}
+
+function drawStrokePencil(p: p5 | p5.Graphics, stroke: Stroke) {
+    if (stroke.points.length < 2) return;
+
+    p.push();
+    p.noStroke();
+    const alpha = 110; // light, lets underlying strokes show through
+    const [r, g, b] = stroke.color;
+    p.fill(r, g, b, alpha);
+
+    sampleStrokePoints(stroke, 0.24, (x, y) => {
+        p.circle(x, y, Math.max(1, stroke.penSize * 0.85));
+    });
+
+    p.pop();
+}
+
+function drawStrokeBrush(p: p5 | p5.Graphics, stroke: Stroke) {
+    if (stroke.points.length < 2) return;
+
+    p.push();
+    p.noStroke();
+
+    const baseAlpha = 255; // bold, opaque paint
+    const [r, g, b] = stroke.color;
+
+    // Smooth, paint stroke aligned to movement direction
+    sampleStrokePoints(stroke, 0.12, (x, y, A, B) => {
+        const angle = Math.atan2(B.y - A.y, B.x - A.x);
+
+        // Core body: thick, elongated ellipse
+        p.push();
+        p.translate(x, y);
+        p.rotate(angle);
+        p.fill(r, g, b, baseAlpha);
+        p.ellipse(0, 0, stroke.penSize * 1.9, stroke.penSize * 1.2);
+
+        // Soft shoulder to keep edges smooth without visible stippling
+        p.fill(r, g, b, Math.floor(baseAlpha * 0.7));
+        p.ellipse(0, 0, stroke.penSize * 2.2, stroke.penSize * 1.45);
+        p.pop();
+    });
+
+    p.pop();
+}
+
+function drawStrokeMarker(p: p5 | p5.Graphics, stroke: Stroke) {
+    if (stroke.points.length < 2) return;
+
+    p.push();
+    p.noStroke();
+
+    const baseAlpha = 230; // fountain-pen ink
+    const [r, g, b] = stroke.color;
+
+    p.rectMode((p as any).CENTER || 3); // CENTER constant may be numeric in some builds
+
+    sampleStrokePoints(stroke, 0.2, (x: number, y: number) => {
+        // thinner oval for a fountain-pen style line, fixed orientation
+        p.fill(r, g, b, baseAlpha);
+        p.ellipse(x, y, stroke.penSize * 1.4, stroke.penSize * 0.55);
+    });
+
+    p.pop();
+}
+
+function drawStrokeEraser(p: p5 | p5.Graphics, stroke: Stroke) {
+    if (stroke.points.length < 2) return;
+
+    p.push();
+    p.noStroke();
+    p.fill(255); // Paint white instead of erasing alpha
+
+    // Use similar sizing to brush for consistency
+    sampleStrokePoints(stroke, 0.12, (x, y) => {
+        p.circle(x, y, stroke.penSize * 1.6);
+    });
+
+    p.pop();
 }
 
 // -------------------------------
