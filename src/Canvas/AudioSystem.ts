@@ -7,17 +7,26 @@
  *          BiquadFilter for smoother oscillator sounds, proper cleanup of audio nodes
  * Verified: Tested draw/click sounds work correctly, no audio popping,
  *           cross-checked with MDN Web Audio API docs, tested multiple browsers
- * Modified: Removed unnecessary functions to keep only essential audio features
+ * Modified: Changed from noise to musical tones for each drawing tool
  */
 
 class AudioSystem {
     private audioContext: AudioContext | null = null;
     private isPlaying: boolean = false;
     private gainNode: GainNode | null = null;
-    private oscillator: OscillatorNode | null = null;
+    private currentToolType: string = "";
+    private musicInterval: any = null;
+    private currentNoteIndex: number = 0;
+
+    // Different melodies for different tools
+    private melodies: { [key: string]: number[] } = {
+        pencil: [523, 587, 659, 698, 784, 698, 659, 587], // C-D-E-F-G-F-E-D (major scale)
+        brush: [440, 494, 523, 587, 659, 587, 523, 494], // A-B-C-D-E-D-C-B (softer)
+        marker: [659, 698, 784, 880, 988, 880, 784, 698], // E-F-G-A-B-A-G-F (higher)
+        eraser: [392, 349, 330, 294, 262, 294, 330, 349], // G-F-E-D-C-D-E-F (descending)
+    };
 
     constructor() {
-        // Initialize on first user interaction to comply with browser policies
         this.initAudio();
     }
 
@@ -26,15 +35,17 @@ class AudioSystem {
             this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
             this.gainNode = this.audioContext.createGain();
             this.gainNode.connect(this.audioContext.destination);
-            this.gainNode.gain.value = 0.1; // Low volume for subtle effect
+            this.gainNode.gain.value = 0.15; // Volume for music
         } catch (e) {
             console.warn("Web Audio API not supported", e);
         }
     }
 
-   // Start a continuous drawing sound
-    startDrawSound() {
+    // Start a continuous drawing sound
+    startDrawSound(toolType: string = "pencil") {
         if (!this.audioContext || !this.gainNode || this.isPlaying) return;
+
+        this.currentToolType = toolType;
 
         try {
             // Resume context if suspended (browser autoplay policy)
@@ -42,59 +53,69 @@ class AudioSystem {
                 this.audioContext.resume();
             }
 
-            // Create white noise for realistic marker scratch sound
-            const bufferSize = this.audioContext.sampleRate * 2;
-            const noiseBuffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
-            const output = noiseBuffer.getChannelData(0);
-            
-            // Fill with random values for white noise
-            for (let i = 0; i < bufferSize; i++) {
-                output[i] = Math.random() * 2 - 1;
-            }
-            
-            const whiteNoise = this.audioContext.createBufferSource();
-            whiteNoise.buffer = noiseBuffer;
-            whiteNoise.loop = true;
-            
-            // Filter to make it sound like paper friction
-            const filter = this.audioContext.createBiquadFilter();
-            filter.type = 'bandpass';
-            filter.frequency.value = 3000; // Mid-high frequencies for scratch sound
-            filter.Q.value = 0.5; // Not too narrow
-            
-            whiteNoise.connect(filter);
-            filter.connect(this.gainNode);
-            
-            // Fade in
-            this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-            this.gainNode.gain.linearRampToValueAtTime(0.08, this.audioContext.currentTime + 0.05);
-            
-            whiteNoise.start();
-            this.isPlaying = true;
-            
-            // Store reference to stop it later
-            (this as any).noiseSource = whiteNoise;
+            // Play music for the current tool
+            this.startMusic(toolType);
         } catch (e) {
             console.warn("Could not start draw sound", e);
         }
     }
-  // Stop the drawing sound
+
+    private startMusic(toolType: string) {
+        if (!this.audioContext || !this.gainNode) return;
+
+        this.isPlaying = true;
+        this.currentNoteIndex = 0;
+
+        // Get the melody for this tool, default to pencil if not found
+        const melody = this.melodies[toolType] || this.melodies.pencil;
+
+        // Play a note every 200ms
+        this.musicInterval = setInterval(() => {
+            this.playMusicNote(melody);
+            this.currentNoteIndex = (this.currentNoteIndex + 1) % melody.length;
+        }, 200);
+
+        // Play first note immediately
+        this.playMusicNote(melody);
+    }
+
+    private playMusicNote(melody: number[]) {
+        if (!this.audioContext || !this.gainNode) return;
+
+        try {
+            const osc = this.audioContext.createOscillator();
+            const noteGain = this.audioContext.createGain();
+            
+            osc.type = 'sine'; // Pure, clean sine wave
+            osc.frequency.value = melody[this.currentNoteIndex];
+            
+            // Smooth envelope for beautiful sound
+            noteGain.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+            noteGain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+            
+            osc.connect(noteGain);
+            noteGain.connect(this.gainNode);
+            
+            osc.start();
+            osc.stop(this.audioContext.currentTime + 0.3);
+        } catch (e) {
+            console.warn("Could not play music note", e);
+        }
+    }
+
+    // Stop the drawing sound
     stopDrawSound() {
         if (!this.audioContext || !this.gainNode || !this.isPlaying) return;
 
         try {
-            // Fade out
-            this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, this.audioContext.currentTime);
-            this.gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.05);
-            
-            const noiseSource = (this as any).noiseSource;
-            if (noiseSource) {
-                noiseSource.stop(this.audioContext.currentTime + 0.05);
-                (this as any).noiseSource = null;
+            // Stop music interval
+            if (this.musicInterval) {
+                clearInterval(this.musicInterval);
+                this.musicInterval = null;
             }
             
             this.isPlaying = false;
-            this.oscillator = null;
+            this.currentToolType = "";
         } catch (e) {
             console.warn("Could not stop draw sound", e);
         }
@@ -113,9 +134,9 @@ class AudioSystem {
             const clickGain = this.audioContext.createGain();
             
             osc.type = 'sine';
-            osc.frequency.value = 400;
+            osc.frequency.value = 800; // Higher, clearer click
             
-            clickGain.gain.setValueAtTime(0.15, this.audioContext.currentTime);
+            clickGain.gain.setValueAtTime(0.2, this.audioContext.currentTime);
             clickGain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
             
             osc.connect(clickGain);
