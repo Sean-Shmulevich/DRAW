@@ -38,7 +38,7 @@
       <!-- ADD PICTURE -->
       <ToolButton
         icon="📸"
-        title="Take Picture"
+        title="Save Your Creation"
         className="w-full col-span-2"
         wide={true}
         onClick={addPicture}
