@@ -16,6 +16,8 @@ import {
 
 } from "./CanvasState";
 
+import { audioSystem } from "./AudioSystem";
+
 import {
     startShape,
     updateShape,
@@ -75,12 +77,15 @@ function sketch(p: p5, container: HTMLDivElement) {
         // -------------------------------------------
         if (tool === "stroke") {
             if (p.mouseIsPressed && isInsideCanvas(p)) {
-                if (!getCurrentStroke()) startStroke();
+                if (!getCurrentStroke()) {
+                    startStroke();
+                    audioSystem.startDrawSound(); // <-- ADDED THIS LINE
+                }
 
                 appendPoint(p.mouseX, p.mouseY);
 
                 const live = getCurrentStroke();
-                if (live) drawStroke(preview, live); // draw ONLY on preview layer
+                if (live) drawStroke(preview, live);
             } else {
                 const finished = getCurrentStroke();
                 if (finished) {
@@ -88,6 +93,7 @@ function sketch(p: p5, container: HTMLDivElement) {
                     drawStroke(permanent, finished);
                     const historyEntry = finishStroke();
                     if (historyEntry) history.push(historyEntry as any);
+                    audioSystem.stopDrawSound(); // <-- ADDED THIS LINE
                 }
             }
         }
@@ -97,7 +103,10 @@ function sketch(p: p5, container: HTMLDivElement) {
         // -------------------------------------------
         if (tool === "shape") {
             if (p.mouseIsPressed && isInsideCanvas(p)) {
-                if (!getCurrentShape()) startShape(p.mouseX, p.mouseY, toolType as ShapeType);
+                if (!getCurrentShape()) {
+                    startShape(p.mouseX, p.mouseY, toolType as ShapeType);
+                    audioSystem.playClickSound(); // <-- ADDED THIS LINE
+                }
                 else updateShape(p.mouseX, p.mouseY);
             } else {
                 const finished = getCurrentShape();
@@ -106,6 +115,7 @@ function sketch(p: p5, container: HTMLDivElement) {
                     drawShape(permanent, finished);
                     let historyEntry = finishShape();
                     if (historyEntry) history.push(historyEntry as any);
+                    audioSystem.playClickSound(); // <-- ADDED THIS LINE
                 }
             }
 
