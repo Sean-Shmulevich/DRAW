@@ -103,6 +103,7 @@ The system must meet **WCAG 2.1 web accessibility standards**.
 - Clean/move alternate drawings into their own folder
 - Use a preview + permanent graphics layer for unconfirmed drawings  
   - Needed to clear canvas while drawing shapes without removing existing strokes (shadowing)
+- Shape menu preview.
 ---
 
 ## ⏳ In-Progress / Remaining Tasks

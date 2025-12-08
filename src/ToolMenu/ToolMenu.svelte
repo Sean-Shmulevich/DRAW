@@ -28,7 +28,6 @@
   let shape_stroke_color = $state("#000000");
   let fill_color = $state("#ff77c8");
   let shape_stroke_size = $state(10);
-
   function sendEmail(): any {
     throw new Error("Function not implemented.");
     // take a picture of the $p5Canvas and use the email API to create an email with the client os email client.

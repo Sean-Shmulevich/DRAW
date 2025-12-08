@@ -20,7 +20,6 @@ export function registerPermanentLayer(layer: p5.Graphics) {
 export function getPermanentLayer(): p5.Graphics | null {
     return permanentLayer;
 }
-
 export function rebuildFromHistory() {
     strokes = [];
     shapes = [];
