@@ -4,11 +4,14 @@
   export let onClick: () => void = () => {};
   export let wide: boolean = false;
   export let className: string = "";
+  export let active: boolean = false;
+
+  $: console.log("ToolButton active:", active);
 </script>
 
 <button
   on:click={onClick}
-  class={`tool-btn ${wide ? "tool-wide" : "tool-square"} ${className}`}
+  class={`tool-btn ${wide ? "tool-wide" : "tool-square"} ${active ? "border-6 border-red-500" : "border"} ${className}`}
 >
   {#if icon}
     <span class="icon">{icon}</span>
@@ -22,7 +25,6 @@
   .tool-btn {
     background: white;
     text-align: center;
-    border: 2px solid black;
     border-radius: 12px;
     cursor: pointer;
     transition: filter 0.15s ease;

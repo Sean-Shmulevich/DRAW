@@ -30,7 +30,16 @@
   let fill_color = $state("#FFFFFF");
   let shape_stroke_size = $state(10);
 
-  let current_shape = $state("rectangle");
+  // which section is currently active? ("brush" or "shape")
+  let activeSection = $state<"stroke" | "shape">("stroke");
+
+  // last selected tools for each section
+  let current_brush = $state<"pencil" | "brush" | "marker" | "eraser">(
+    "pencil"
+  );
+  let current_shape = $state<"triangle" | "circle" | "square" | "rectangle">(
+    "rectangle"
+  );
 
   function sendEmail(): any {
     throw new Error("Function not implemented.");
@@ -54,29 +63,62 @@
 <div class="flex flex-col gap-2 mt-3">
   <label class="text-sm font-semibold text-pink-600">Brush/Pencil/Paint</label>
 
-  <div class="bg-green-200/60 p-3 rounded-xl border">
+  <div
+    class="bg-green-200/60 p-3 rounded-xl border-4 ${activeSection === 'stroke'
+      ? 'border-4 border-red-600'
+      : 'border-green-200'} shadow"
+  >
     <div class="flex justify-between items-center">
       <div class="flex gap-3">
         <ToolButton
           icon="✏️"
+          active={current_brush === "pencil"}
           title="Pencil"
-          onClick={() => setTool("stroke", "pencil")}
+          onClick={() => {
+            if (activeSection !== "stroke") {
+              activeSection = "stroke";
+            }
+            setTool("stroke", "pencil");
+            current_brush = "pencil";
+          }}
         />
         <ToolButton
           icon="🖌️"
           title="Brush"
-          onClick={() => setTool("stroke", "brush")}
+          active={current_brush === "brush"}
+          onClick={() => {
+            if (activeSection !== "stroke") {
+              activeSection = "stroke";
+            }
+            setTool("stroke", "brush");
+            current_brush = "brush";
+          }}
         />
         <ToolButton
           icon="🪶"
           title="marker"
-          onClick={() => setTool("stroke", "marker")}
+          active={current_brush === "marker"}
+          onClick={() => {
+            if (activeSection !== "stroke") {
+              activeSection = "stroke";
+            }
+            setTool("stroke", "marker");
+            current_brush = "marker";
+          }}
         />
 
         <ToolButton
           title="Eraser"
           icon="🧽"
-          onClick={() => setTool("stroke", "eraser")}
+          active={current_brush === "eraser"}
+          onClick={() => {
+            if (activeSection !== "stroke") {
+              activeSection = "stroke";
+            }
+            setTool("stroke", "eraser");
+            current_brush = "eraser";
+            current_brush = current_brush;
+          }}
         />
       </div>
 
@@ -84,7 +126,6 @@
     </div>
 
     <div class="mt-4">
-      <label class="text-xs font-medium text-red-700">Stroke Size</label>
       <Slider
         min={1}
         max={60}
@@ -101,33 +142,49 @@
     <label class="text-sm font-semibold text-red-600">Shape Tool</label>
 
     <div
-      class="bg-yellow-100/60 p-4 rounded-xl border border-yellow-400 shadow flex flex-col gap-4"
+      class="bg-yellow-100/60 p-4 rounded-xl border-4 shadow flex flex-col gap-4 ${activeSection ===
+      'shape'
+        ? 'border-4 border-red-600'
+        : 'border-2'}"
     >
       <!-- SHAPE BUTTONS -->
       <div class="flex gap-3 justify-start content-evenly">
         <ToolButton
           icon="▲"
+          active={current_shape === "triangle"}
           onClick={() => {
+            if (activeSection !== "shape") {
+              activeSection = "shape";
+            }
             setTool("shape", "triangle");
             current_shape = "triangle";
           }}
         />
         <ToolButton
           icon="●"
+          active={current_shape === "circle"}
           onClick={() => {
+            if (activeSection !== "shape") {
+              activeSection = "shape";
+            }
             setTool("shape", "circle");
             current_shape = "circle";
           }}
         />
         <ToolButton
           icon="■"
+          active={current_shape === "square"}
           onClick={() => {
+            if (activeSection !== "shape") {
+              activeSection = "shape";
+            }
             setTool("shape", "square");
             current_shape = "square";
           }}
         />
         <ToolButton
           icon="▭"
+          active={current_shape === "rectangle"}
           onClick={() => {
             setTool("shape", "rectangle");
             current_shape = "rectangle";
