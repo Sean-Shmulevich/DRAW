@@ -26,7 +26,7 @@ import {
     type ShapeType
 } from "./Shape";
 
-import { history, registerPermanentLayer, syncListeners } from "./SyncSubsystem";
+import { history, registerPermanentLayer, syncListeners, persistHistory, restoreFromStorage } from "./SyncSubsystem";
 
 
 let permanent: p5.Graphics;   // stores completed artwork
@@ -64,6 +64,9 @@ function sketch(p: p5, container: HTMLDivElement) {
         syncListeners(canvas.elt, p);
 
         permanent.background(255);
+
+        // Restore any saved history after layers are ready
+        restoreFromStorage();
     };
 
     p.draw = () => {
@@ -87,7 +90,10 @@ function sketch(p: p5, container: HTMLDivElement) {
                     // 🟢 Move final stroke into permanent layer
                     drawStroke(permanent, finished);
                     const historyEntry = finishStroke();
-                    if (historyEntry) history.push(historyEntry as any);
+                    if (historyEntry) {
+                        history.push(historyEntry as any);
+                        persistHistory();
+                    }
                 }
             }
         }
@@ -105,7 +111,10 @@ function sketch(p: p5, container: HTMLDivElement) {
                     // 🟢 Move final shape into permanent layer
                     drawShape(permanent, finished);
                     let historyEntry = finishShape();
-                    if (historyEntry) history.push(historyEntry as any);
+                    if (historyEntry) {
+                        history.push(historyEntry as any);
+                        persistHistory();
+                    }
                 }
             }
 
